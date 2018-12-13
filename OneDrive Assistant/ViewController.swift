@@ -47,9 +47,14 @@ class ViewController: NSViewController {
     @IBOutlet var saveButton: NSButton!
     @IBOutlet var startButton: NSButton!
     @IBOutlet var textView: NSTextView!
+    @IBOutlet var progressBar: NSProgressIndicator!
     
     // MARK: - Properties
     var fileStack = DirectoryStack()
+    var fileCount = 0
+    var folderCount = 0
+    var totalItems = 0
+    
     // TO-DO: - Fix this assignment here to not have a default
     var currentDirectory = URL(fileURLWithPath: "/var/tmp")
     
@@ -88,6 +93,12 @@ extension ViewController {
         // Load the Stack
         depthFirstTraversal(through: root)
         
+//        self.totalItems = self.folderCount + self.fileCount
+//
+//        self.progressBar.minValue = Double(0)
+//        self.progressBar.maxValue = Double(self.totalItems)
+//        self.progressBar.startAnimation(self.progressBar)
+        
         // As long as we have something in the stack, lets' rename some stuff
         while !self.fileStack.isEmpty() {
             self.currentDirectory = self.fileStack.pop()!
@@ -97,13 +108,14 @@ extension ViewController {
                 for file in files {
                     // Rename the content of the folder
                     checkName(of: file, at: index)
+//                    self.progressBar.increment(by: Double(1))
                     index += 1
                 }
             } catch {
-                print("Error during enumeration")
+                output(message: "Unknown error encountered while retrieving files in \(self.currentDirectory.absoluteString.dropFirst(7)), skipping this directory")
             }
         }
-        
+        output(message: "Finished working on \(self.folderCount) folder(s) and \(self.fileCount) file(s).")
     }
     
     // Build a stack that will allows us to go through each "level" of the directory backwards
@@ -117,6 +129,9 @@ extension ViewController {
                     self.fileStack.push(content)
                     depthFirstTraversal(through: content)
                     isLeaf = false
+                    self.folderCount += 1
+                } else {
+                    self.fileCount += 1
                 }
             }
         } catch {
@@ -163,6 +178,11 @@ extension ViewController {
         } else {
             // There is a file extension, let's remove it!
             oldFileNameWithoutExtension = oldFile.deletingPathExtension().lastPathComponent
+        }
+        
+        // If the file is .DS_Store, ignore it
+        if oldFileName == ".DS_Store" {
+            return
         }
         
         // If the file is a forbidden name, fix it and return
@@ -260,7 +280,6 @@ extension ViewController {
         }
         // Get rid of the extra '/' character
         newPathString.removeLast()
-        
         // Build the new file URL from the path string
         let newFile = URL.init(fileURLWithPath: newPathString, isDirectory: isDirectory)
         do {
