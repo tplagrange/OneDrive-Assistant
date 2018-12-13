@@ -71,33 +71,62 @@ class ViewController: NSViewController {
     
 }
 
+// MARK: - Output Information to User
+extension ViewController {
+    
+    func output(message: String) {
+        self.textView.string.append(message)
+        self.textView.string.append("\n")
+    }
+}
+
 // MARK: - Depth First Search over Contents
 
 extension ViewController {
     
-    func recurse(through folder: URL) -> Void {
-        if self.fileStack.isEmpty() {
-            print("No more directories in the stack")
-            return
-        }
-        self.currentDirectory = folder
-        let fileManager = FileManager.default
+    func fixContents(at root: URL) -> Void {
+        // Load the Stack
+        depthFirstTraversal(through: root)
         
+        // As long as we have something in the stack, lets' rename some stuff
+        while !self.fileStack.isEmpty() {
+            self.currentDirectory = self.fileStack.pop()!
+            do {
+                let contents = try FileManager.default.contentsOfDirectory(at: self.currentDirectory, includingPropertiesForKeys: [], options: [])
+                var index = 0
+                for content in contents {
+                    // Rename the content of the folder
+                    validateName(of: content, at: index, isDirectory: FileManager.default.existence(atUrl: content) == FileExistence.directory)
+                    index += 1
+                }
+            } catch {
+                print("Error during enumeration")
+            }
+        }
+        
+    }
+    
+    // Build a stack that will allows us to go through each "level" of the directory backwards
+    func depthFirstTraversal(through folder: URL) {
+        var isLeaf = true
         do {
-            let contents = try fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: [], options: [])
+            let contents = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [], options: [])
             for content in contents {
+                // Push any directories in folder
                 if FileManager.default.existence(atUrl: content) == FileExistence.directory {
-                    print("\(content.absoluteString) is a directory")
                     self.fileStack.push(content)
-                } else  {
-                    print("\(content.absoluteString) is a file")
+                    depthFirstTraversal(through: content)
+                    isLeaf = false
                 }
             }
         } catch {
             print("Error during enumeration")
         }
-        //print("Popped: " + self.fileStack.pop()!.absoluteString)
-        return
+        if isLeaf {
+            return
+        }
+        // Push any directories in folder
+        // Once done, DFS through those folders
     }
 }
 
@@ -105,16 +134,46 @@ extension ViewController {
 
 extension ViewController {
     
-    func fixPathName(of path: URL, atIndex: Int) -> URL {
+    // TO-DO: - This is big and ugly. Make it Swifty please.
+    func validateName(of path: URL, at index: Int, isDirectory: Bool) {
         var containsIllegalCharacters = false
-        var isInvalidFileName = false
-        
+        var isInvalidName = false
+        var components = path.pathComponents
         let name = path.lastPathComponent
+        var newName = "default"
+        var newPath: String
+        var newURL: URL
+        var nameWithoutExtension = name
+        
+        // Get the filename without the extension; if there is one
+        let fileExtension = path.pathExtension
+        if !fileExtension.isEmpty {
+            nameWithoutExtension = String(name.dropLast(fileExtension.count + 1))
+        }
+        
+
+        // Drop the extension from the file name
+        if !fileExtension.isEmpty {
+            nameWithoutExtension = String(name.dropLast(fileExtension.count + 1))
+        }
+        
+        
+        // Safely ignore DS_Store
+        if name == ".DS_Store" {
+            return
+        }
+        
+        // No matter what, we're going to trim whitespace from the beginning of the filename
+        // Also trimming whitespace from the end of the filename (excluding extension)
+        
+        
         // Invalid characters:
         // " * : < > ? / \ |
-        let badCharacters = CharacterSet(charactersIn: "\"*:<>?/\\|").inverted
+        let badCharacters = CharacterSet(charactersIn: "~\"#%&:*<>?/\\{|}.")
         if name.rangeOfCharacter(from: badCharacters) != nil {
             containsIllegalCharacters = true
+        } else {
+            print("Contains no invalid characters")
         }
         
         switch name {
@@ -122,23 +181,80 @@ extension ViewController {
         // .lock, CON, PRN, AUX, NUL, COM1 - COM9, LPT1 - LPT9, _vti_, desktop.ini, any filename starting with ~$.
         case ".lock","CON","PRN","AUX","NUL","COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9",
              "LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9","desktop.ini":
-            isInvalidFileName = true
+            isInvalidName = true
         default:
             print("Valid file or folder name")
-            
         }
         // '_vti_' is prohibited ANYWHERE in the filename
         if name.contains("_vti_") {
             print("Illegal filename: '_vti_' detected at \(path.absoluteString)")
-            isInvalidFileName = true
+            isInvalidName = true
         }
         // 'forms' dissalowed at root level of One Drive
-        if self.selectedFolder == self.currentDirectory && name == "forms" {
+        if path.deletingLastPathComponent() == self.selectedFolder && name == "forms" && isDirectory == false {
             print("Illegal filename: 'forms' detected at \(path.absoluteString)")
+            newName = "formsFile"
+            isInvalidName = true
         }
         
+        if isInvalidName {
+            if isDirectory {
+                newName = "FOLDER\(index)"
+            } else {
+                newName = "FILE\(index)"
+            }
+            components[components.count - 1] = newName
+            newPath = ""
+            for component in components {
+                newPath.append(component)
+                newPath.append("/")
+            }
+            newPath.removeLast()
+            newURL = URL.init(fileURLWithPath: newPath, isDirectory: isDirectory)
+            do {
+                try FileManager.default.moveItem(at: path, to: newURL)
+                output(message: "Renamed: \(path.absoluteString.dropFirst(7)) -> \(newURL.absoluteString.dropFirst(7))")
+            } catch {
+                output(message: "Error renaming \(path.absoluteString.dropFirst(7)), skipping...")
+                return
+            }
+        }
         
-        return path
+        if containsIllegalCharacters {
+            // Wipe the newName variable and build up the new name
+            var newName = ""
+            // Check each character for an illegal character and replace as necessary
+            for character in nameWithoutExtension {
+                switch character {
+                case "~", "\"", "#", "%", "&", ":", "*", "<", ">", "?", "/", "\\", "{", "|", "}", ".":
+                    newName.append("-")
+                default:
+                    newName.append(character)
+                }
+            }
+            // Rejoin the file extension
+            if !fileExtension.isEmpty {
+                newName = "\(newName).\(fileExtension)"
+            }
+            
+            // Replace the last component with the new file name
+            components[components.count - 1] = newName
+            newPath = ""
+            for component in components {
+                newPath.append(component)
+                newPath.append("/")
+            }
+            newPath.removeLast()
+            newURL = URL.init(fileURLWithPath: newPath, isDirectory: isDirectory)
+            do {
+                try FileManager.default.moveItem(at: path, to: newURL)
+                output(message: "Renamed \(path.absoluteString.dropFirst(7)) -> \(newURL.absoluteString.dropFirst(7))")
+            } catch {
+                output(message: "Error renaming \(path.absoluteString.dropFirst(7)), skipping...")
+                return
+            }
+        }
+    
     }
 }
 
@@ -166,10 +282,11 @@ extension ViewController {
     
     @IBAction func startButtonClicked(_ sender: NSButton) {
         if let folder = self.fileStack.peek() {
-            self.textView.string.append("\nBeginning scan of paths at: " + folder.absoluteString)
-            self.recurse(through: folder)
+            self.textView.string = ""
+            output(message: "Beginning scan of paths at: " + folder.absoluteString)
+            self.fixContents(at: folder)
         } else {
-            self.textView.string.append("\nThere was an error at the start")
+            output(message: "There was an error at the start. Do you have read + write permission for the selected folder?")
         }
     }
     
