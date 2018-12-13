@@ -92,11 +92,11 @@ extension ViewController {
         while !self.fileStack.isEmpty() {
             self.currentDirectory = self.fileStack.pop()!
             do {
-                let contents = try FileManager.default.contentsOfDirectory(at: self.currentDirectory, includingPropertiesForKeys: [], options: [])
+                let files = try FileManager.default.contentsOfDirectory(at: self.currentDirectory, includingPropertiesForKeys: [], options: [])
                 var index = 0
-                for content in contents {
+                for file in files {
                     // Rename the content of the folder
-                    validateName(of: content, at: index, isDirectory: FileManager.default.existence(atUrl: content) == FileExistence.directory)
+                    checkName(of: file, at: index)
                     index += 1
                 }
             } catch {
@@ -130,132 +130,149 @@ extension ViewController {
     }
 }
 
-// MARK: - Fix Path Name
+// MARK: - Check & Fix Path Name
 
 extension ViewController {
     
-    // TO-DO: - This is big and ugly. Make it Swifty please.
-    func validateName(of path: URL, at index: Int, isDirectory: Bool) {
-        var containsIllegalCharacters = false
-        var isInvalidName = false
-        var components = path.pathComponents
-        let name = path.lastPathComponent
-        var newName = "default"
-        var newPath: String
-        var newURL: URL
-        var nameWithoutExtension = name
-        
-        // Get the filename without the extension; if there is one
-        let fileExtension = path.pathExtension
-        if !fileExtension.isEmpty {
-            nameWithoutExtension = String(name.dropLast(fileExtension.count + 1))
-        }
-        
+    /*
+    Filenames will be checked for things that will prevent upload to OneDrive.
+     This includes:
+        -some special characters
+        -some forbidden filenames
+        -whitespaces at the beginning or end of the filename (excluding the extension).
+            -This is not in the documentation but was discovered in testing
+     See doc: https://support.office.com/en-us/article/invalid-file-names-and-file-types-in-onedrive-onedrive-for-business-and-sharepoint-64883a5d-228e-48f5-b3d2-eb39e07630fa
+    */
 
-        // Drop the extension from the file name
-        if !fileExtension.isEmpty {
-            nameWithoutExtension = String(name.dropLast(fileExtension.count + 1))
+    //Supply the URL of a file to check
+    //Supply the index which will be used to avoid duplicate naming (TO-DO: Better method for avoiding duplicates)
+    func checkName(of oldFile: URL, at index: Int) {
+        let isDirectory = FileManager.default.existence(atUrl: oldFile) == FileExistence.directory
+        let oldFileName = oldFile.lastPathComponent
+        var oldFileNameWithoutExtension: String
+        var newFileName: String
+        var needsRenaming = false
+        var newFileNameWithoutExtension: String
+ 
+        // We are not concerned with blocking or fixing extensions (for now...)
+        // Because of this, we want to have access to the filename without it's extension (if it has one)
+        let fileExtension = oldFile.pathExtension
+        if fileExtension.isEmpty {
+            // No file extension, just return the name of the file
+            oldFileNameWithoutExtension = oldFileName
+        } else {
+            // There is a file extension, let's remove it!
+            oldFileNameWithoutExtension = oldFile.deletingPathExtension().lastPathComponent
         }
         
+        // If the file is a forbidden name, fix it and return
+        switch oldFileName {
+        case ".lock","CON","PRN","AUX","NUL","COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9",
+             "LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9":
+            if isDirectory {
+                newFileName = "FOLDER\(index)"
+            } else {
+                newFileName = "FILE\(index)"
+            }
+            guard rename(file: oldFile, to: newFileName, isDirectory: isDirectory) != nil else { return }
+            return
+        case "desktop.ini":
+            newFileName = "desktop-ini"
+            guard rename(file: oldFile, to: newFileName, isDirectory: isDirectory) != nil else { return }
+            return
+        default:
+            break
+        }
         
-        // Safely ignore DS_Store
-        if name == ".DS_Store" {
+        // If the file is called 'forms' and is at the directory root, rename it to 'formsFile' and return
+        if oldFileName == "forms" && !isDirectory && self.currentDirectory == self.selectedFolder {
+            guard rename(file: oldFile, to: "formsFile", isDirectory: isDirectory) != nil else { return }
             return
         }
         
-        // No matter what, we're going to trim whitespace from the beginning of the filename
-        // Also trimming whitespace from the end of the filename (excluding extension)
+        // TO-DO: - Make this more Swifty
+        // Trim the filename (without extension) to be safe
+        let oldFileNameWithoutExtensionTrimmed = oldFileNameWithoutExtension.trimmingCharacters(in: .whitespacesAndNewlines)
+        if oldFileNameWithoutExtensionTrimmed != oldFileNameWithoutExtension {
+            // Looks like we trimmed something. We should mark this file to be renamed.
+            needsRenaming = true
+        }
         
+        // If the file starts with '~$', replace the occurence with '-$' and continue
+        if oldFileNameWithoutExtension.prefix(2) == "~$" {
+            oldFileNameWithoutExtension = "-$" + oldFileNameWithoutExtension.dropFirst(2)
+            needsRenaming = true
+        }
         
-        // Invalid characters:
-        // " * : < > ? / \ |
+        // If the file contains '_vti_' in the filename, replace the occurence with '-vti-' and continue
+        if oldFileNameWithoutExtension.contains("_vti_") {
+            oldFileNameWithoutExtension = oldFileNameWithoutExtension.replacingOccurrences(of: "_vti_", with: "-vti-")
+            needsRenaming = true
+        }
+        
+        // If we're still here we need to check for illegal characters
+        // Illegal characters: ~ " # % & : * < > ? / \ { | } .
         let badCharacters = CharacterSet(charactersIn: "~\"#%&:*<>?/\\{|}.")
-        if name.rangeOfCharacter(from: badCharacters) != nil {
-            containsIllegalCharacters = true
-        } else {
-            print("Contains no invalid characters")
-        }
-        
-        switch name {
-            // Invalid files or folder names:
-        // .lock, CON, PRN, AUX, NUL, COM1 - COM9, LPT1 - LPT9, _vti_, desktop.ini, any filename starting with ~$.
-        case ".lock","CON","PRN","AUX","NUL","COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9",
-             "LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9","desktop.ini":
-            isInvalidName = true
-        default:
-            print("Valid file or folder name")
-        }
-        // '_vti_' is prohibited ANYWHERE in the filename
-        if name.contains("_vti_") {
-            print("Illegal filename: '_vti_' detected at \(path.absoluteString)")
-            isInvalidName = true
-        }
-        // 'forms' dissalowed at root level of One Drive
-        if path.deletingLastPathComponent() == self.selectedFolder && name == "forms" && isDirectory == false {
-            print("Illegal filename: 'forms' detected at \(path.absoluteString)")
-            newName = "formsFile"
-            isInvalidName = true
-        }
-        
-        if isInvalidName {
-            if isDirectory {
-                newName = "FOLDER\(index)"
-            } else {
-                newName = "FILE\(index)"
-            }
-            components[components.count - 1] = newName
-            newPath = ""
-            for component in components {
-                newPath.append(component)
-                newPath.append("/")
-            }
-            newPath.removeLast()
-            newURL = URL.init(fileURLWithPath: newPath, isDirectory: isDirectory)
-            do {
-                try FileManager.default.moveItem(at: path, to: newURL)
-                output(message: "Renamed: \(path.absoluteString.dropFirst(7)) -> \(newURL.absoluteString.dropFirst(7))")
-            } catch {
-                output(message: "Error renaming \(path.absoluteString.dropFirst(7)), skipping...")
-                return
-            }
-        }
-        
-        if containsIllegalCharacters {
-            // Wipe the newName variable and build up the new name
-            var newName = ""
-            // Check each character for an illegal character and replace as necessary
-            for character in nameWithoutExtension {
+        if oldFileNameWithoutExtension.rangeOfCharacter(from: badCharacters) != nil {
+            needsRenaming = true
+            var tmpName = ""
+            for character in oldFileNameWithoutExtension {
                 switch character {
                 case "~", "\"", "#", "%", "&", ":", "*", "<", ">", "?", "/", "\\", "{", "|", "}", ".":
-                    newName.append("-")
+                    tmpName.append("-")
                 default:
-                    newName.append(character)
+                    tmpName.append(character)
                 }
             }
-            // Rejoin the file extension
-            if !fileExtension.isEmpty {
-                newName = "\(newName).\(fileExtension)"
-            }
-            
-            // Replace the last component with the new file name
-            components[components.count - 1] = newName
-            newPath = ""
-            for component in components {
-                newPath.append(component)
-                newPath.append("/")
-            }
-            newPath.removeLast()
-            newURL = URL.init(fileURLWithPath: newPath, isDirectory: isDirectory)
-            do {
-                try FileManager.default.moveItem(at: path, to: newURL)
-                output(message: "Renamed \(path.absoluteString.dropFirst(7)) -> \(newURL.absoluteString.dropFirst(7))")
-            } catch {
-                output(message: "Error renaming \(path.absoluteString.dropFirst(7)), skipping...")
-                return
-            }
+            newFileNameWithoutExtension = tmpName
+        } else {
+            newFileNameWithoutExtension = oldFileNameWithoutExtension
         }
-    
+        
+        // At this point, 0 or more changes have been made to the original file name sans extension
+        // As such, let's check if we're flagged for a change
+        if needsRenaming {
+            // If we need to rename the file, we also need to rejoin the file extension if there was one
+            if fileExtension.isEmpty {
+                // No extension so we can just use the existing string
+                newFileName = newFileNameWithoutExtension
+            } else {
+                // There is a file extension and it needs to be added
+                newFileName = "\(newFileNameWithoutExtension).\(fileExtension)"
+            }
+            guard rename(file: oldFile, to: newFileName, isDirectory: isDirectory) != nil else { return }
+        } else {
+            // If we're not flagged, we can return without any modifications.
+            return
+        }
+        
+        
     }
+
+    func rename(file oldFile: URL, to newFileName: String, isDirectory: Bool) -> URL? {
+        // Rebuild the path using components
+        var pathComponents = oldFile.pathComponents.dropLast()
+        pathComponents.append(newFileName)
+        var newPathString = ""
+        for pathComponent in pathComponents {
+            newPathString.append(pathComponent)
+            newPathString.append("/")
+        }
+        // Get rid of the extra '/' character
+        newPathString.removeLast()
+        
+        // Build the new file URL from the path string
+        let newFile = URL.init(fileURLWithPath: newPathString, isDirectory: isDirectory)
+        do {
+            try FileManager.default.moveItem(at: oldFile, to: newFile)
+            output(message: "Renamed: \(oldFile.absoluteString.dropFirst(7)) -> \(newFile.absoluteString.dropFirst(7))")
+            return newFile
+        } catch {
+            output(message: "Error renaming \(oldFile.absoluteString.dropFirst(7)), skipping...")
+            return nil
+        }
+    }
+    
 }
 
 // MARK: - Actions
