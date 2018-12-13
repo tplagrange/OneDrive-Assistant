@@ -326,15 +326,38 @@ extension ViewController {
         }
     }
     
-    @IBAction func askBeforeRenaming(_ sender: NSButton) {
+    @IBAction func askBeforeRenaming(_ sender: Any) {
     }
     
     @IBAction func tableViewDoubleClicked(_ sender: Any) {
     }
     
     @IBAction func saveOutputClicked(_ sender: Any) {
+        let data = self.textView.string
+        let dialog = NSSavePanel()
+        
+        dialog.title = "Save Output"
+        dialog.showsResizeIndicator = true
+        dialog.canCreateDirectories = true
+        dialog.showsHiddenFiles = false
+        dialog.allowedFileTypes = ["txt"]
+        
+        if (dialog.runModal() == NSApplication.ModalResponse.OK) {
+            let result = dialog.url
+            
+            if (result != nil) {
+                let path = result!.path
+                do {
+                    try data.write(toFile: path, atomically: false, encoding: .utf8)
+                }
+                catch {
+                    print(error.localizedDescription)
+                }
+            } else {
+                return // User clicked cancel
+            }
+        }
     }
-    
 }
 
 extension FileManager {
