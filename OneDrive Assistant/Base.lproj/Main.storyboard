@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14868"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -161,6 +162,10 @@
                                         </textView>
                                     </subviews>
                                 </clipView>
+                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="IU9-Eo-r95">
+                                    <rect key="frame" x="-100" y="-100" width="985" height="15"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
                                 <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="QBj-tj-AKJ">
                                     <rect key="frame" x="985" y="0.0" width="15" height="413"/>
                                     <autoresizingMask key="autoresizingMask"/>
@@ -202,6 +207,9 @@
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="askBeforeRenamingToggled:" target="rPt-NT-nkU" id="Odq-4m-Hm6"/>
+                                </connections>
                             </button>
                             <progressIndicator wantsLayer="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="BG2-gO-AlQ">
                                 <rect key="frame" x="0.0" y="60" width="1000" height="20"/>
@@ -225,6 +233,7 @@
                             <constraint firstItem="yyV-At-hxF" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" symbolic="YES" id="P87-6Y-w6B"/>
                             <constraint firstItem="bQp-ce-TlF" firstAttribute="leading" secondItem="yyV-At-hxF" secondAttribute="trailing" constant="12" symbolic="YES" id="PIQ-av-VhJ"/>
                             <constraint firstItem="yyV-At-hxF" firstAttribute="top" secondItem="BG2-gO-AlQ" secondAttribute="bottom" constant="20" symbolic="YES" id="T05-rJ-WPl"/>
+                            <constraint firstItem="Iye-He-xcD" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="bQp-ce-TlF" secondAttribute="trailing" constant="8" symbolic="YES" id="go8-1P-nmh"/>
                             <constraint firstItem="35f-7T-P8F" firstAttribute="leading" secondItem="m7y-LR-Q8R" secondAttribute="leading" id="jfh-DM-nN4"/>
                             <constraint firstItem="bQp-ce-TlF" firstAttribute="baseline" secondItem="Iye-He-xcD" secondAttribute="baseline" id="jk0-IC-TBQ"/>
                             <constraint firstItem="BG2-gO-AlQ" firstAttribute="top" secondItem="m7y-LR-Q8R" secondAttribute="bottom" constant="8" symbolic="YES" id="soS-Bg-ChJ"/>
@@ -232,6 +241,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="askBeforeRenaming" destination="Iye-He-xcD" id="qkz-YT-iBP"/>
                         <outlet property="progressBar" destination="BG2-gO-AlQ" id="oWl-3m-gSf"/>
                         <outlet property="saveButton" destination="pJ8-5g-Ax4" id="gzx-sx-OtD"/>
                         <outlet property="startButton" destination="bQp-ce-TlF" id="JqT-Xh-dLr"/>

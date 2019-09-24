@@ -48,9 +48,11 @@ class ViewController: NSViewController {
     @IBOutlet var startButton: NSButton!
     @IBOutlet var textView: NSTextView!
     @IBOutlet var progressBar: NSProgressIndicator!
+    @IBOutlet var askBeforeRenaming: NSButton!
     
     // MARK: - Properties
     var fileStack = DirectoryStack()
+    var shouldAskBeforeRenaming = true
     var fileCount = 0
     var folderCount = 0
     var totalItems = 0
@@ -71,7 +73,7 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        textView.string = "Welcome! Please select the root folder for your One Drive "
+        textView.string = "Welcome! Please select the root folder for your OneDrive\n"
     }
     
 }
@@ -326,7 +328,9 @@ extension ViewController {
         }
     }
     
-    @IBAction func askBeforeRenaming(_ sender: Any) {
+    @IBAction func askBeforeRenamingToggled(_ sender: Any) {
+        shouldAskBeforeRenaming = shouldAskBeforeRenaming ? false : true
+        shouldAskBeforeRenaming ? print("True") : print("False")
     }
     
     @IBAction func tableViewDoubleClicked(_ sender: Any) {
