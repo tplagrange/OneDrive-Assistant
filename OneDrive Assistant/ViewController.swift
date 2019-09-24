@@ -96,6 +96,8 @@ extension ViewController {
         
         // Load the Stack
         depthFirstTraversal(through: root)
+        self.progressBar.minValue = 0
+        self.progressBar.maxValue = Double(fileCount) + Double(folderCount)
         
         // As long as we have something in the stack, lets' rename some stuff
         while !self.fileStack.isEmpty() {
@@ -106,7 +108,7 @@ extension ViewController {
                 for file in files {
                     // Rename the content of the folder
                     checkName(of: file, at: index)
-//                    self.progressBar.increment(by: Double(1))
+                    self.progressBar.increment(by: Double(1))
                     index += 1
                 }
             } catch {
@@ -231,13 +233,13 @@ extension ViewController {
         
         // If we're still here we need to check for illegal characters
         // Illegal characters: ~ " # % & : * < > ? / \ { | } .
-        let badCharacters = CharacterSet(charactersIn: "~\"#%&:*<>?/\\{|}.")
+        let badCharacters = CharacterSet(charactersIn: "~\"#%&:*<>?/\\|")
         if oldFileNameWithoutExtension.rangeOfCharacter(from: badCharacters) != nil {
             needsRenaming = true
             var tmpName = ""
             for character in oldFileNameWithoutExtension {
                 switch character {
-                case "~", "\"", "#", "%", "&", ":", "*", "<", ">", "?", "/", "\\", "{", "|", "}", ".":
+                case "~", "\"", "#", "%", "&", ":", "*", "<", ">", "?", "/", "\\", "|":
                     tmpName.append("-")
                 default:
                     tmpName.append(character)
@@ -279,6 +281,7 @@ extension ViewController {
         }
         // Get rid of the extra '/' character
         newPathString.removeLast()
+        
         // Build the new file URL from the path string
         let newFile = URL.init(fileURLWithPath: newPathString, isDirectory: isDirectory)
         do {

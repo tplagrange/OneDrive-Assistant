@@ -171,18 +171,8 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yyV-At-hxF">
-                                <rect key="frame" x="14" y="13" width="120" height="32"/>
-                                <buttonCell key="cell" type="push" title="Select Folder" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Xpu-be-oYl">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="selectFolderClicked:" target="rPt-NT-nkU" id="VxL-ih-pjz"/>
-                                </connections>
-                            </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bQp-ce-TlF">
-                                <rect key="frame" x="134" y="13" width="70" height="32"/>
+                            <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bQp-ce-TlF">
+                                <rect key="frame" x="134" y="18" width="70" height="32"/>
                                 <buttonCell key="cell" type="push" title="Start" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="4yF-kQ-0XF">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -192,7 +182,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pJ8-5g-Ax4">
-                                <rect key="frame" x="871" y="13" width="115" height="32"/>
+                                <rect key="frame" x="871" y="14" width="115" height="31"/>
                                 <buttonCell key="cell" type="push" title="Save Output" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="7dl-Fu-cZI">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -202,8 +192,8 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Iye-He-xcD">
-                                <rect key="frame" x="723" y="22" width="148" height="18"/>
-                                <buttonCell key="cell" type="check" title="Ask before renaming" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="1nf-Kt-FzK">
+                                <rect key="frame" x="741" y="23" width="130" height="16"/>
+                                <buttonCell key="cell" type="check" title="Ask before renaming" bezelStyle="regularSquare" state="on" transparent="YES" inset="2" id="1nf-Kt-FzK">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -211,38 +201,52 @@
                                     <action selector="askBeforeRenamingToggled:" target="rPt-NT-nkU" id="Odq-4m-Hm6"/>
                                 </connections>
                             </button>
-                            <progressIndicator wantsLayer="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="BG2-gO-AlQ">
-                                <rect key="frame" x="0.0" y="60" width="1000" height="20"/>
-                            </progressIndicator>
                             <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="35f-7T-P8F">
                                 <rect key="frame" x="0.0" y="85" width="1000" height="5"/>
                             </box>
+                            <progressIndicator wantsLayer="YES" maxValue="100" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="sFw-W4-5mE">
+                                <rect key="frame" x="206" y="21" width="32" height="31"/>
+                            </progressIndicator>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yyV-At-hxF">
+                                <rect key="frame" x="14" y="19" width="120" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="zGf-Wt-bJk"/>
+                                </constraints>
+                                <buttonCell key="cell" type="push" title="Select Folder" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Xpu-be-oYl">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="selectFolderClicked:" target="rPt-NT-nkU" id="VxL-ih-pjz"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="35f-7T-P8F" firstAttribute="trailing" secondItem="m7y-LR-Q8R" secondAttribute="trailing" id="3SA-UL-oM1"/>
-                            <constraint firstItem="35f-7T-P8F" firstAttribute="leading" secondItem="BG2-gO-AlQ" secondAttribute="leading" id="51o-gA-cYA"/>
-                            <constraint firstAttribute="trailing" secondItem="pJ8-5g-Ax4" secondAttribute="trailing" constant="20" symbolic="YES" id="53s-Yv-Uzx"/>
-                            <constraint firstAttribute="trailing" secondItem="35f-7T-P8F" secondAttribute="trailing" id="6wV-B8-w4R"/>
-                            <constraint firstItem="Iye-He-xcD" firstAttribute="baseline" secondItem="pJ8-5g-Ax4" secondAttribute="baseline" id="7Nw-Uw-fFG"/>
-                            <constraint firstAttribute="bottom" secondItem="yyV-At-hxF" secondAttribute="bottom" constant="20" symbolic="YES" id="BBe-Jp-Wev"/>
-                            <constraint firstItem="m7y-LR-Q8R" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Cfp-Np-qEN"/>
-                            <constraint firstItem="yyV-At-hxF" firstAttribute="baseline" secondItem="bQp-ce-TlF" secondAttribute="baseline" id="Fnd-Ht-qXI"/>
-                            <constraint firstItem="35f-7T-P8F" firstAttribute="trailing" secondItem="BG2-gO-AlQ" secondAttribute="trailing" id="GhW-0z-AuD"/>
-                            <constraint firstItem="m7y-LR-Q8R" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="LgC-Pa-6lO"/>
-                            <constraint firstItem="BG2-gO-AlQ" firstAttribute="top" secondItem="35f-7T-P8F" secondAttribute="bottom" constant="8" symbolic="YES" id="O3V-vI-eEB"/>
-                            <constraint firstItem="yyV-At-hxF" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" symbolic="YES" id="P87-6Y-w6B"/>
-                            <constraint firstItem="bQp-ce-TlF" firstAttribute="leading" secondItem="yyV-At-hxF" secondAttribute="trailing" constant="12" symbolic="YES" id="PIQ-av-VhJ"/>
-                            <constraint firstItem="yyV-At-hxF" firstAttribute="top" secondItem="BG2-gO-AlQ" secondAttribute="bottom" constant="20" symbolic="YES" id="T05-rJ-WPl"/>
-                            <constraint firstItem="Iye-He-xcD" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="bQp-ce-TlF" secondAttribute="trailing" constant="8" symbolic="YES" id="go8-1P-nmh"/>
-                            <constraint firstItem="35f-7T-P8F" firstAttribute="leading" secondItem="m7y-LR-Q8R" secondAttribute="leading" id="jfh-DM-nN4"/>
-                            <constraint firstItem="bQp-ce-TlF" firstAttribute="baseline" secondItem="Iye-He-xcD" secondAttribute="baseline" id="jk0-IC-TBQ"/>
-                            <constraint firstItem="BG2-gO-AlQ" firstAttribute="top" secondItem="m7y-LR-Q8R" secondAttribute="bottom" constant="8" symbolic="YES" id="soS-Bg-ChJ"/>
-                            <constraint firstItem="pJ8-5g-Ax4" firstAttribute="leading" secondItem="Iye-He-xcD" secondAttribute="trailing" constant="8" symbolic="YES" id="wox-Dm-FDp"/>
+                            <constraint firstItem="m7y-LR-Q8R" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="4fC-65-2bQ"/>
+                            <constraint firstItem="sFw-W4-5mE" firstAttribute="leading" secondItem="bQp-ce-TlF" secondAttribute="trailing" constant="8" symbolic="YES" id="4tc-Fh-uAu"/>
+                            <constraint firstItem="pJ8-5g-Ax4" firstAttribute="leading" secondItem="Iye-He-xcD" secondAttribute="trailing" constant="8" symbolic="YES" id="6sh-Qx-aDH"/>
+                            <constraint firstItem="Iye-He-xcD" firstAttribute="centerY" secondItem="pJ8-5g-Ax4" secondAttribute="centerY" id="7Wb-ta-hE3"/>
+                            <constraint firstItem="sFw-W4-5mE" firstAttribute="top" secondItem="m7y-LR-Q8R" secondAttribute="bottom" constant="35" id="D7P-Ff-yAR"/>
+                            <constraint firstItem="bQp-ce-TlF" firstAttribute="leading" secondItem="yyV-At-hxF" secondAttribute="trailing" constant="12" symbolic="YES" id="FJc-CJ-2DB"/>
+                            <constraint firstItem="yyV-At-hxF" firstAttribute="top" secondItem="m7y-LR-Q8R" secondAttribute="bottom" constant="40" id="MwW-b0-7bn"/>
+                            <constraint firstItem="m7y-LR-Q8R" firstAttribute="leading" secondItem="35f-7T-P8F" secondAttribute="leading" id="Os0-0n-aQ9"/>
+                            <constraint firstItem="m7y-LR-Q8R" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="P8X-5l-9VI"/>
+                            <constraint firstAttribute="trailing" secondItem="pJ8-5g-Ax4" secondAttribute="trailing" constant="20" symbolic="YES" id="Qsg-mR-KoE"/>
+                            <constraint firstItem="yyV-At-hxF" firstAttribute="centerY" secondItem="sFw-W4-5mE" secondAttribute="centerY" id="S5t-if-7zi"/>
+                            <constraint firstAttribute="bottom" secondItem="yyV-At-hxF" secondAttribute="bottom" constant="26" id="VZ3-gh-MbX"/>
+                            <constraint firstItem="sFw-W4-5mE" firstAttribute="bottom" secondItem="pJ8-5g-Ax4" secondAttribute="bottom" id="W5c-mf-5aY"/>
+                            <constraint firstItem="pJ8-5g-Ax4" firstAttribute="top" secondItem="m7y-LR-Q8R" secondAttribute="bottom" constant="46" id="Xfx-yl-eZc"/>
+                            <constraint firstItem="bQp-ce-TlF" firstAttribute="top" secondItem="m7y-LR-Q8R" secondAttribute="bottom" constant="41" id="Zis-qc-KOw"/>
+                            <constraint firstItem="m7y-LR-Q8R" firstAttribute="bottom" secondItem="35f-7T-P8F" secondAttribute="bottom" id="eBQ-80-Bxs"/>
+                            <constraint firstItem="yyV-At-hxF" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" symbolic="YES" id="ecu-OR-gLP"/>
+                            <constraint firstItem="35f-7T-P8F" firstAttribute="trailing" secondItem="m7y-LR-Q8R" secondAttribute="trailing" id="ovM-Xq-9pv"/>
+                            <constraint firstItem="bQp-ce-TlF" firstAttribute="centerY" secondItem="sFw-W4-5mE" secondAttribute="centerY" id="oyq-yp-eKd"/>
+                            <constraint firstAttribute="trailing" secondItem="m7y-LR-Q8R" secondAttribute="trailing" id="qX4-Jy-hmD"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="ProgressBar" destination="sFw-W4-5mE" id="hFP-yR-Tzs"/>
                         <outlet property="askBeforeRenaming" destination="Iye-He-xcD" id="2SZ-yN-6uD"/>
-                        <outlet property="progressBar" destination="BG2-gO-AlQ" id="oWl-3m-gSf"/>
                         <outlet property="saveButton" destination="pJ8-5g-Ax4" id="gzx-sx-OtD"/>
                         <outlet property="startButton" destination="bQp-ce-TlF" id="JqT-Xh-dLr"/>
                         <outlet property="textView" destination="ENv-QZ-ycD" id="fQy-xk-biG"/>
