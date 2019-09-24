@@ -92,6 +92,8 @@ extension ViewController {
 extension ViewController {
     
     func fixContents(at root: URL) -> Void {
+        self.askBeforeRenaming.isEnabled = false
+        
         // Load the Stack
         depthFirstTraversal(through: root)
         
@@ -112,6 +114,7 @@ extension ViewController {
             }
         }
         output(message: "Finished working on \(self.folderCount) folder(s) and \(self.fileCount) file(s).")
+        self.askBeforeRenaming.isEnabled = true
     }
     
     // Build a stack that will allows us to go through each "level" of the directory backwards
@@ -314,13 +317,13 @@ extension ViewController {
                 self.selectedFolder = panel.urls[0]
                 print(self.selectedFolder ?? "Selected Folder")
                 self.fileStack.push(self.selectedFolder!)
+                self.output(message: "Selected \"\(self.outputPath(of: self.selectedFolder!))\"")
             }
         }
     }
     
     @IBAction func startButtonClicked(_ sender: NSButton) {
         if let folder = self.fileStack.peek() {
-            self.textView.string = ""
             output(message: "Beginning scan of paths at: \"" + outputPath(of: folder) + "\"")
             self.fixContents(at: folder)
         } else {

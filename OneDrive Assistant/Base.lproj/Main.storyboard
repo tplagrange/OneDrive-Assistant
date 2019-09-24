@@ -241,7 +241,7 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="askBeforeRenaming" destination="Iye-He-xcD" id="qkz-YT-iBP"/>
+                        <outlet property="askBeforeRenaming" destination="Iye-He-xcD" id="2SZ-yN-6uD"/>
                         <outlet property="progressBar" destination="BG2-gO-AlQ" id="oWl-3m-gSf"/>
                         <outlet property="saveButton" destination="pJ8-5g-Ax4" id="gzx-sx-OtD"/>
                         <outlet property="startButton" destination="bQp-ce-TlF" id="JqT-Xh-dLr"/>
