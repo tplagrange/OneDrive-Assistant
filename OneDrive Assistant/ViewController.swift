@@ -93,12 +93,6 @@ extension ViewController {
         // Load the Stack
         depthFirstTraversal(through: root)
         
-//        self.totalItems = self.folderCount + self.fileCount
-//
-//        self.progressBar.minValue = Double(0)
-//        self.progressBar.maxValue = Double(self.totalItems)
-//        self.progressBar.startAnimation(self.progressBar)
-        
         // As long as we have something in the stack, lets' rename some stuff
         while !self.fileStack.isEmpty() {
             self.currentDirectory = self.fileStack.pop()!
@@ -284,12 +278,18 @@ extension ViewController {
         let newFile = URL.init(fileURLWithPath: newPathString, isDirectory: isDirectory)
         do {
             try FileManager.default.moveItem(at: oldFile, to: newFile)
-            output(message: "Renamed: \(oldFile.absoluteString.dropFirst(7)) -> \(newFile.absoluteString.dropFirst(7))")
+            output(message: "Renamed: \"\(outputPath(of: oldFile))\" -> \"\(outputPath(of: newFile))\"")
             return newFile
         } catch {
-            output(message: "Error renaming \(oldFile.absoluteString.dropFirst(7)), skipping...")
+            output(message: "Error renaming \"\(outputPath(of: oldFile))\", skipping...")
             return nil
         }
+    }
+    
+    func outputPath(of file: URL) -> String {
+        let str = file.absoluteString.dropFirst(7)
+        let replaced = str.replacingOccurrences(of: "%20", with: " ")
+        return replaced
     }
     
 }
@@ -319,7 +319,7 @@ extension ViewController {
     @IBAction func startButtonClicked(_ sender: NSButton) {
         if let folder = self.fileStack.peek() {
             self.textView.string = ""
-            output(message: "Beginning scan of paths at: " + folder.absoluteString)
+            output(message: "Beginning scan of paths at: \"" + outputPath(of: folder) + "\"")
             self.fixContents(at: folder)
         } else {
             output(message: "There was an error at the start. Do you have read + write permission for the selected folder?")
